@@ -10,7 +10,11 @@
     </div>
     <div class="addForm_fieldContainer">
       <label class="addForm_label">Выберите обложку книги</label>
-      <input type="file" accept="image/*" @change="onCoverChange" />
+      <input type="file" accept="image/*" :disabled="!!modelValue.coverUrl" @change="onCoverChange"/>
+    </div>
+    <div class="addForm_fieldContainer">
+      <label class="addForm_label">Или введите путь к обложке</label>
+      <input class="addForm_text" type="text" placeholder="http://..." :value="modelValue.coverUrl" :disabled="!!modelValue.coverFile" @input="updateField('coverUrl', $event.target.value)"/>
     </div>
     <div class="addForm_fieldContainer">
       <label class="addForm_label">Введите описание обложки</label>
@@ -62,9 +66,11 @@
   const onCoverChange = (event) => {
     const file = event.target.files[0]
     if (!file) return
+
     emit('update:modelValue', {
       ...props.modelValue,
       coverFile: file,
+      coverUrl: '',
       cover: URL.createObjectURL(file)
     })
   }

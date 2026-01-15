@@ -12,7 +12,23 @@
         </div>
         <div class="addForm_fieldContainer">
           <label class="addForm_label">Выберите обложку книги</label>
-          <input class="" type="file" accept="image/*" @change="onCoverChange"/>
+          <input
+            type="file"
+            accept="image/*"
+            @change="onCoverChange"
+            :disabled="!!form.coverUrl"
+          />
+        </div>
+
+        <div class="addForm_fieldContainer">
+          <label class="addForm_label">Или введите путь к обложке</label>
+          <input
+            class="addForm_text"
+            type="text"
+            placeholder="http://..."
+            v-model="form.coverUrl"
+            :disabled="!!form.coverFile"
+          />
         </div>
         <div class="addForm_fieldContainer">
           <label class="addForm_label">Введите описание обложки</label>
@@ -97,7 +113,8 @@ const form = ref({
   isForAdult: false,
   cover: '',
   coverAlt: '',
-  coverFile: null
+  coverFile: null,
+  coverUrl: ''
 })
 const showAddForm = () => {
   isEditMode.value = false
@@ -123,6 +140,7 @@ const onCoverChange = (event) => {
   const file = event.target.files[0]
   if (!file) return
   form.value.coverFile = file
+  form.value.coverUrl = ''
   form.value.cover = URL.createObjectURL(file)
 }
 const submitForm = () => {
@@ -133,7 +151,7 @@ const submitForm = () => {
     book.genre = form.value.genre
     book.isForAdult = form.value.isForAdult
     book.coverAlt = form.value.coverAlt || form.value.title
-    if (form.value.coverFile) {
+    if (form.value.coverFile || form.value.coverUrl) {
       book.cover = form.value.cover
     }
   } else {
@@ -144,7 +162,7 @@ const submitForm = () => {
       isForAdult: form.value.isForAdult,
       cover: form.value.cover || '/img/default-cover.png',
       coverAlt: form.value.coverAlt || form.value.title,
-      rating: 0,
+      rating: 0
     })
   }
   closeForm()
@@ -158,6 +176,7 @@ const resetForm = () => {
     cover: '',
     coverAlt: '',
     coverFile: null,
+    coverUrl: ''
   }
 }
 const closeForm = () => {
@@ -239,7 +258,10 @@ const averageRating = computed(() => {
 
   return avg.toFixed(2)
 })
-watch(isFormVisible, (visible) => {
-  document.body.style.overflow = visible ? 'hidden' : ''
+watch(() => form.value.coverUrl, (url) => {
+  if (url) {
+    form.value.coverFile = null
+    form.value.cover = url
+  }
 })
 </script>

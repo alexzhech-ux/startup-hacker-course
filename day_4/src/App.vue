@@ -55,7 +55,8 @@ const form = ref({
   isForAdult: false,
   cover: '',
   coverAlt: '',
-  coverFile: null
+  coverFile: null,
+  coverUrl: ''
 })
 const onEditBook = (index) => {
   const book = books.value[index]
@@ -84,7 +85,8 @@ const showEditForm = (item, index) => {
     isForAdult: item.isForAdult,
     cover: item.cover,
     coverAlt: item.coverAlt || item.title,
-    coverFile: null
+    coverFile: null,
+    coverUrl: item.cover?.startsWith('http') ? item.cover : ''
   }
   isFormVisible.value = true
 }
@@ -94,6 +96,11 @@ const dialogTitle = computed(() => {
   }
   return 'Книга'
 })
+const resolveCover = () => {
+  if (form.value.coverFile) return form.value.cover
+  if (form.value.coverUrl) return form.value.coverUrl
+  return '/img/default-cover.png'
+}
 const submitForm = () => {
   if (isEditMode.value) {
     const book = books.value[editedBookIndex.value]
@@ -103,7 +110,7 @@ const submitForm = () => {
     book.isForAdult = form.value.isForAdult
     book.coverAlt = form.value.coverAlt || form.value.title
     if (form.value.coverFile) {
-      book.cover = form.value.cover
+      book.cover = resolveCover()
     }
   } else {
     books.value.push({
@@ -111,9 +118,9 @@ const submitForm = () => {
       description: form.value.description,
       genre: form.value.genre,
       isForAdult: form.value.isForAdult,
-      cover: form.value.cover || '/img/default-cover.png',
+      cover: resolveCover(),
       coverAlt: form.value.coverAlt || form.value.title,
-      rating: 0,
+      rating: 0
     })
   }
   closeForm()
@@ -127,6 +134,7 @@ const resetForm = () => {
     cover: '',
     coverAlt: '',
     coverFile: null,
+    coverUrl: ''
   }
 }
 const closeForm = () => {
@@ -201,7 +209,10 @@ const averageRating = computed(() => {
   const avg = sum / books.value.length
   return avg.toFixed(2)
 })
-watch(isFormVisible, (visible) => {
-  document.body.style.overflow = visible ? 'hidden' : ''
+watch(() => form.value.coverUrl, (url) => {
+  if (url) {
+    form.value.coverFile = null
+    form.value.cover = url
+  }
 })
 </script>
