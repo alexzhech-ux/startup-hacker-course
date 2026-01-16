@@ -19,7 +19,6 @@
             :disabled="!!form.coverUrl"
           />
         </div>
-
         <div class="addForm_fieldContainer">
           <label class="addForm_label">Или введите путь к обложке</label>
           <input

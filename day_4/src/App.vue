@@ -109,7 +109,7 @@ const submitForm = () => {
     book.genre = form.value.genre
     book.isForAdult = form.value.isForAdult
     book.coverAlt = form.value.coverAlt || form.value.title
-    if (form.value.coverFile) {
+    if (form.value.coverFile || form.value.coverUrl) {
       book.cover = resolveCover()
     }
   } else {
