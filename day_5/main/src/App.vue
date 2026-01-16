@@ -1,11 +1,12 @@
 <template>
   <div class="app">
     <Dialog
-      :visible="isFormVisible"
+      v-if="isFormVisible"
       :title="dialogTitle"
       @cancel="closeForm"
     >
       <BookForm
+        ref="bookFormRef"
         v-model="form"
         :options="options"
         :isEditMode="isEditMode"
@@ -15,26 +16,34 @@
     </Dialog>
     <ul class="booksList">
       <BookCard
-        v-for="(book, index) in books" :key="index" :book="book" :index="index" 
-        @edit="onEditBook" @delete="onDeleteBook" @update:rating="onRateBook"
+        v-for="(book, index) in books"
+        :key="index"
+        :book="book"
+        :index="index"
+        @edit="onEditBook"
+        @delete="onDeleteBook"
+        @update:rating="onRateBook"
       />
     </ul>
     <div class="addBookButtonPosition">
       <button class="addBookButton" @click="showAddForm">Добавить</button>
     </div>
-    <div class="">
-      <button class="" @click="resetAllRatings">Сбросить рейтинг</button>
-      <div>
+    <div class="ratingSummary">
+      <button class="resetRatingButton" @click="resetAllRatings">
+        Сбросить рейтинг
+      </button>
+
+      <div class="ratingInfo">
         <h2>Общий рейтинг</h2>
-        <p>Всего книг: <span>{{ totalBooks }}</span></p>
-        <p>Средний рейтинг: <span>{{ averageRating }}</span></p>
+        <p>Всего книг: <strong>{{ totalBooks }}</strong></p>
+        <p>Средний рейтинг: <strong>{{ averageRating }}</strong></p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, nextTick } from 'vue'
 import BookCard from './BookCard.vue'
 import Dialog from './Dialog.vue'
 import BookForm from './BookForm.vue'
@@ -42,7 +51,7 @@ const totalBooks = computed(() => books.value.length)
 const isFormVisible = ref(false)
 const isEditMode = ref(false)
 const editedBookIndex = ref(null)
-const DEFAULT_GENRE = 'Повесть'
+const bookFormRef = ref(null)
 const form = ref({
   title: '',
   description: '',
@@ -210,9 +219,43 @@ watch(() => form.value.coverUrl, (url) => {
     form.value.cover = url
   }
 })
+watch(isFormVisible, async (visible) => {
+  if (visible) {
+    await nextTick()
+    bookFormRef.value?.focusTitle()
+  }
+})
 </script>
 
 <style scoped lang="scss">
+.dialog-fade-slide-enter-from {
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+.dialog-fade-slide-enter-active {
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.dialog-fade-slide-enter-to {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dialog-fade-slide-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dialog-fade-slide-leave-active {
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.dialog-fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(40px);
+}
+
 .booksList {
   display: flex;
   flex-wrap: wrap;
@@ -230,4 +273,5 @@ watch(() => form.value.coverUrl, (url) => {
   font-size: 28px;
   border-radius: 30px;
 }
+
 </style>

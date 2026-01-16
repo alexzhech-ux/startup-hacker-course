@@ -20,7 +20,7 @@
     </div>
     <div class="book-list">
         <BookCard v-for="book in books" :key="book.id" :book="book"
-            v-bind:update:rating="updateRating" @edit="editBook" @remove="removeBook" />
+            @update:rating="updateRating" @edit="editBook" @remove="removeBook" />
     </div>
 </div>
 </template>
@@ -44,7 +44,7 @@ function updateRating(id, rating) {
     });
 }
 function removeBook(id) {
-    books.value.filter((book) => book.id !== id);
+    books.value = books.value.filter((book) => book.id !== id);
 }
 function editBook(id) {
     currentBook.value = books.value.find((book) => book.id === id);
@@ -65,7 +65,7 @@ function updateBook(data) {
         data.rating = m.rating;
         return data;
     }
-    return data;
+    return m;
     });
     hideForm();
 }

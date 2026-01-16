@@ -32,3 +32,35 @@
     emit('cancel')
     }
 </script>
+
+<style scoped lang="scss">
+.dialogOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dialogWindow {
+  background: #fff;
+  border-radius: 8px;
+  min-width: 400px;
+  max-width: 90%;
+}
+
+.dialogHeader {
+  padding: 16px;
+  border-bottom: 1px solid #ddd;
+}
+
+.dialogBody {
+  padding: 16px;
+}
+
+.dialogTitle {
+  margin: 0;
+}
+</style>

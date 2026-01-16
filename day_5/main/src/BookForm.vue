@@ -2,7 +2,7 @@
   <form class="addForm" @click.stop>
     <div class="addForm_fieldContainer">
       <label class="addForm_label">Введите название книги</label>
-      <input class="addForm_text" type="text" placeholder="Старик и море" :value="modelValue.title" @input="updateField('title', $event.target.value)"/>
+      <input ref="titleInput" class="addForm_text" type="text" placeholder="Старик и море" :value="modelValue.title" @input="updateField('title', $event.target.value)"/>
     </div>
     <div class="addForm_fieldContainer">
       <label class="addForm_label">Введите описание книги</label>
@@ -22,23 +22,13 @@
     </div>
     <div class="addForm_noFlexFieldContainer">
       <label class="addForm_label">Выберите жанры книги</label>
-
       <select @change="onGenreSelect">
-        <option disabled value="">
-          Выберите жанр
-        </option>
-
-        <option
-          v-for="option in options"
-          :key="option.value"
-          :value="option.text"
-        >
+        <option disabled value="">Выберите жанр</option>
+        <option v-for="option in options" :key="option.value" :value="option.text">
           {{ option.text }}
         </option>
       </select>
-
-      <p class="selectedGenres" v-if="modelValue.genres.length">
-        Выбрано:
+      <p class="selectedGenres" v-if="modelValue.genres.length">Выбрано:
         <span v-for="(g, i) in modelValue.genres" :key="i">
           {{ g }}<span v-if="i < modelValue.genres.length - 1">, </span>
         </span>
@@ -56,6 +46,9 @@
 </template>
 
 <script setup>
+  import { ref, watch} from 'vue'
+  import debounce from 'lodash/debounce'
+  const titleInput = ref(null)
   const props = defineProps({
     modelValue: {
       type: Object,
@@ -70,6 +63,9 @@
       default: false
     }
   })
+  const sendTitleToServer = debounce((value) => {
+    console.log(`Отправили "${value}" на сервер`)
+  }, 500)
   const emit = defineEmits([
     'update:modelValue',
     'submit',
@@ -111,53 +107,57 @@
     })
     event.target.value = ''
   }
+  defineExpose({
+    focusTitle() {
+      titleInput.value?.focus()
+    }
+  })
+  watch(
+    () => props.modelValue.title,
+    (newTitle) => {
+      if (!newTitle) return
+      sendTitleToServer(newTitle)
+    }
+  )
 </script>
 
 <style scoped lang="scss">
-.addForm {
-  background-color: #fff;
-  border: 2px solid black;
-  border-radius: 30px;
-  width: 500px;
-  padding: 30px;
-
-  &_fieldContainer {
-    margin-top: 20px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+  .addForm {
+    background-color: #fff;
+    width: 500px;
+    padding: 30px;
+    &_fieldContainer {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    &_noFlexFieldContainer {
+      margin-top: 20px;
+      display: block;
+    }
+    &_label {
+      margin-right: 4px;
+    }
+    &_text {
+      min-width: 400px;
+    }
+    &_textarea {
+      height: 100px;
+    }
+    &_buttonPosition {
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+    }
+    &_button,
+    &_cencelButton {
+      border-radius: 30px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    &_cencelButton {
+      margin-left: 20px;
+    }
   }
-  &_noFlexFieldContainer {
-    margin-top: 20px;
-    display: block;
-  }
-  &_label {
-    margin-right: 4px;
-  }
-
-  &_text {
-    min-width: 400px;
-  }
-
-  &_textarea {
-    height: 100px;
-  }
-
-  &_buttonPosition {
-    margin-top: 30px;
-    display: flex;
-    justify-content: center;
-  }
-
-  &_button,
-  &_cencelButton {
-    border-radius: 30px;
-    padding: 10px 20px;
-    font-size: 16px;
-  }
-
-  &_cencelButton {
-    margin-left: 20px;
-  }
-}
 </style>
