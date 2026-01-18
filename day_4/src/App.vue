@@ -42,7 +42,6 @@ const totalBooks = computed(() => books.value.length)
 const isFormVisible = ref(false)
 const isEditMode = ref(false)
 const editedBookIndex = ref(null)
-const DEFAULT_GENRE = 'Повесть'
 const form = ref({
   title: '',
   description: '',

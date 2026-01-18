@@ -56,6 +56,7 @@
         <button class="bookItem_editButton" @click="showEditForm(item, index)">
           <img class="bookItem_editButtonIcon" src="/img/icons/edit.png" :alt="item.title"/>
         </button>
+        <button class="bookItem_deleteButton" @click="onDelete">✖</button>
         <div class="bookItemContent">
           <div class="bookCoverBlock">
             <div class="bookCoverBlock_rating">
@@ -115,6 +116,9 @@ const form = ref({
   coverFile: null,
   coverUrl: ''
 })
+const onDelete = (index) => {
+  books.value.splice(index, 1)
+}
 const showAddForm = () => {
   isEditMode.value = false
   editedBookIndex.value = null
