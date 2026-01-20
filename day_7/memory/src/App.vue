@@ -16,14 +16,17 @@
         </div>
       </div>
       <div class="controls">
-        <input
+        <SInput
           type="number"
           min="2"
           max="20"
           v-model.number="pairsCount"
           :disabled="gameStarted && !gameFinished"
+          class="input"
         />
-        <button @click="startGame">Старт</button>
+        <SButton as="button" @click="startGame">
+          Старт
+        </SButton>
       </div>
       <div class="cards-grid">
         <Card
@@ -40,6 +43,8 @@
 <script setup>
     import { ref, computed } from "vue";
     import Card from "@/components/Card.vue";
+    import { SButton, SInput } from "startup-ui";
+    import 'startup-ui/dist/index.css';
     const pairsCount = ref(4);
     const initialPairsCount = ref(0);
     const cards = ref([]);
@@ -64,12 +69,14 @@
         gameStarted.value = false;
         gameFinished.value = false;
         resultGrade.value = "";
+
         firstCard = null;
         secondCard = null;
         lockBoard = false;
-        initialPairsCount.value = pairsCount.value;
-        const numbers = [];
 
+        initialPairsCount.value = pairsCount.value;
+
+        const numbers = [];
         for (let i = 1; i <= initialPairsCount.value; i++) {
             numbers.push(i, i);
         }
@@ -109,15 +116,15 @@
 
         if (firstCard.value === secondCard.value) {
             setTimeout(() => {
-            firstCard.matched = true;
-            secondCard.matched = true;
-            resetTurn();
+                firstCard.matched = true;
+                secondCard.matched = true;
+                resetTurn();
 
-            if (remainingCards.value === 0) {
-                stopTimer();
-                gameFinished.value = true;
-                resultGrade.value = calculateGrade();
-            }
+                if (remainingCards.value === 0) {
+                    stopTimer();
+                    gameFinished.value = true;
+                    resultGrade.value = calculateGrade();
+                }
             }, 400);
         } else {
             setTimeout(() => {
@@ -136,6 +143,7 @@
 
     function startTimer() {
         if (timerId) return;
+
         startTime.value = Date.now();
         timerId = setInterval(() => {
             elapsedSeconds.value = Math.floor(
@@ -162,6 +170,7 @@
     function calculateGrade() {
         const idealMoves = initialPairsCount.value;
         const ratio = moves.value / idealMoves;
+
         if (ratio <= 1.5) return "⭐⭐⭐ Отлично";
         if (ratio <= 2) return "⭐⭐ Хорошо";
         return "⭐ Нормально";
@@ -169,7 +178,7 @@
 </script>
 
 <style scoped lang="scss">
-    .app-wrapper {
+        .app-wrapper {
         display: flex;
         justify-content: center;
         padding: 20px;
@@ -194,6 +203,7 @@
         display: flex;
         gap: 10px;
         margin-bottom: 20px;
+
         input {
             width: 80px;
         }

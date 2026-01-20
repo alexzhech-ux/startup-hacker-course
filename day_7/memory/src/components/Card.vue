@@ -1,18 +1,18 @@
 <template>
-  <div
-    class="card"
-    :class="{ flipped: card.flipped, hidden: card.matched }"
-    @click="$emit('flip', card)"
-  >
-    <div class="card-inner">
-      <div class="card-front">
-        <img src="/img/card.png" alt="card" />
-      </div>
-      <div class="card-back">
-        {{ card.value }}
-      </div>
+    <div
+        class="card"
+        :class="{ flipped: card.flipped, hidden: card.matched }"
+        @click="$emit('flip', card)"
+    >
+        <div class="card-inner">
+            <div class="card-front">
+                <img src="/img/card.png" alt="card" />
+            </div>
+            <div class="card-back">
+                {{ card.value }}
+            </div>
+        </div>
     </div>
-  </div>
 </template>
 
 <script setup>
@@ -25,6 +25,7 @@
     .card {
         perspective: 800px;
         cursor: pointer;
+
         &.hidden {
             visibility: hidden;
         }
@@ -39,7 +40,7 @@
     }
 
     .card.flipped .card-inner {
-        transform: rotateY(180deg);
+    transform: rotateY(180deg);
     }
 
     .card-front,
@@ -55,7 +56,8 @@
     }
 
     .card-front {
-        background: #ccc;
+    background: #ccc;
+
         img {
             width: 100%;
             height: 100%;
