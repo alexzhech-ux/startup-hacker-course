@@ -7,15 +7,15 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\Admin\AdminUserController;
 
-Route::middleware('auth')->group(function () {
-    Route::delete('/admin/users/{user}', [AdminUserController::class, 'destroy']);
-});
-
 Route::get('/', [BookController::class, 'index']);
 
-Route::middleware('auth')->group(function () {
-    Route::get('/my-books', [BookController::class, 'myBooks']);
+Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy']);
 
+Route::middleware('auth')->group(function () {
+
+    Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy']);
+
+    Route::get('/my-books', [BookController::class, 'myBooks']);
     Route::post('/books/{book}/rate', [BookController::class, 'rate']);
 
     Route::resource('books', BookController::class)
@@ -44,8 +44,4 @@ Route::get('/_debug-auth', function () {
         'user' => Auth::user(),
         'session_id' => session()->getId(),
     ]);
-});
-
-Route::middleware(['auth'])->group(function () {
-    Route::delete('/admin/users/{user}', [AdminUserController::class, 'destroy']);
 });

@@ -23,8 +23,14 @@
       >
         Показать
       </SButton>
+      <SButton
+        danger
+        :disabled="!selectedUserId"
+        @click="deleteUser"
+      >
+        Удалить
+      </SButton>
     </div>
-
     <div
       v-if="selectedUser"
       class="adminUserInfo"
@@ -32,6 +38,13 @@
       <h2>Пользователь</h2>
       <p><strong>ID:</strong> {{ selectedUser.id }}</p>
       <p><strong>Username:</strong> {{ selectedUser.username }}</p>
+
+      <SButton
+        danger
+        @click="deleteUser"
+      >
+        Удалить пользователя
+      </SButton>
     </div>
 
     <p>Всего книг: {{ totalBooks }}</p>
@@ -98,6 +111,12 @@ import BookForm from './BookForm.vue'
 
 defineOptions({ layout: AppLayout })
 
+const deleteUser = () => {
+  if (!selectedUserId.value) return
+  if (!confirm('Удалить пользователя?')) return
+
+  router.delete(`/admin/users/${selectedUserId.value}`)
+}
 const props = defineProps({
   title: String,
   books: { type: Array, default: () => [] },

@@ -49,35 +49,35 @@ class BookController extends Controller
     }
 
     public function update(Request $request, Book $book)
-{
-    abort_unless($book->user_id === auth()->id(), 403);
+    {
+        abort_unless($book->user_id === auth()->id(), 403);
 
-    $data = $request->validate([
-        'title'        => ['required', 'string', 'max:255'],
-        'description'  => ['required', 'string'],
-        'is_for_adult' => ['required', 'boolean'],
-        'genres'       => ['array'],
-        'genres.*'     => ['integer'],
-        'cover'        => ['nullable', 'image', 'max:2048'],
-    ]);
+        $data = $request->validate([
+            'title'        => ['required', 'string', 'max:255'],
+            'description'  => ['required', 'string'],
+            'is_for_adult' => ['required', 'boolean'],
+            'genres'       => ['array'],
+            'genres.*'     => ['integer'],
+            'cover'        => ['nullable', 'image', 'max:2048'],
+        ]);
 
-    if ($request->hasFile('cover')) {
-        if ($book->cover) {
-            Storage::disk('public')->delete(
-                str_replace('/storage/', '', $book->cover)
-            );
+        if ($request->hasFile('cover')) {
+            if ($book->cover) {
+                Storage::disk('public')->delete(
+                    str_replace('/storage/', '', $book->cover)
+                );
+            }
+
+            $data['cover'] = '/storage/' . $request
+                ->file('cover')
+                ->store('covers', 'public');
         }
 
-        $data['cover'] = '/storage/' . $request
-            ->file('cover')
-            ->store('covers', 'public');
+        $book->update($data);
+        $book->genres()->sync($data['genres'] ?? []);
+
+        return back();
     }
-
-    $book->update($data);
-    $book->genres()->sync($data['genres'] ?? []);
-
-    return back();
-}
 
     public function destroy($id)
     {
@@ -87,7 +87,7 @@ class BookController extends Controller
 
         $book->delete();
 
-        return back();
+        return back()->noContent(); 
     }
 
     public function rate(Request $request, $id)
