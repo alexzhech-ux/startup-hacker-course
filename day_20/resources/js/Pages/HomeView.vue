@@ -1,15 +1,6 @@
 <template>
   <div>
     <h1>{{ title }}</h1>
-    <pre>{{ $page.props.auth }}</pre>
-    <p>Всего книг: {{ count }}</p>
-
-    <h3>Книги:</h3>
-    <ul>
-      <li v-for="(book, index) in books" :key="index">
-        {{ book }}
-      </li>
-    </ul>
 
   </div>
 
