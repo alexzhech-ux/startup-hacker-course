@@ -3,15 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use Notifiable;
-
     protected $table = 'booksite_users';
+    protected $primaryKey = 'id';
 
-    public $timestamps = false;
+    public $incrementing = true;
+    protected $keyType = 'int';
 
     protected $fillable = [
         'username',
@@ -19,12 +18,10 @@ class User extends Authenticatable
         'role',
     ];
 
-    protected $hidden = [
-        'password',
-    ];
+    protected $hidden = ['password'];
 
-    public function getAuthIdentifierName()
+    public function books()
     {
-        return 'username';
+        return $this->hasMany(Book::class, 'user_id');
     }
 }

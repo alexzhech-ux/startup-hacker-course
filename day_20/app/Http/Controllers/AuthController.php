@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Inertia\Inertia;
 
 class AuthController extends Controller
 {
@@ -24,7 +23,8 @@ class AuthController extends Controller
         }
 
         $request->session()->regenerate();
-        return Inertia::location('/');
+
+        return redirect('/');
     }
 
     public function register(Request $request)
@@ -37,19 +37,22 @@ class AuthController extends Controller
         $user = User::create([
             'username' => $data['username'],
             'password' => Hash::make($data['password']),
-            'role' => 1,
+            'role' => 2,
         ]);
 
         Auth::login($user);
-        return Inertia::location('/');
+        $request->session()->regenerate();
+
+        return redirect('/'); 
     }
 
     public function logout(Request $request)
     {
         Auth::logout();
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return Inertia::location('/');
+        return redirect('/');
     }
 }

@@ -17,7 +17,6 @@ createInertiaApp({
     createApp({ render: () => h(App, props) })
       .use(plugin)
       .use(StartupUI)
-      .component('font-awesome-icon', FontAwesomeIcon)
       .mount(el)
   },
 })

@@ -7,6 +7,12 @@
 
       <Link v-if="user" href="/profile">Профиль</Link>
       <Link v-if="user" href="/my-books">Мои книги</Link>
+      <Link
+      v-if="user && user.role === 1"
+      href="/admin/books"
+    >
+      Список администратора
+    </Link>
     </nav>
 
     <div class="userDataBox">
@@ -17,10 +23,7 @@
       <template v-else>
         <p>{{ user.username }}</p>
 
-        <form method="post" action="/logout">
-          <input type="hidden" name="_token" :value="csrf">
-          <SButton type="submit">Выйти</SButton>
-        </form>
+        <SButton @click="logout">Выйти</SButton>
       </template>
     </div>
 
@@ -37,14 +40,16 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { Link, usePage } from '@inertiajs/vue3'
+import { Link, usePage, router } from '@inertiajs/vue3'
 import { SButton } from 'startup-ui'
-import AuthForm from '@/Components/Auth/AuthForm.vue'
+import AuthForm from '@/Components/AuthForm.vue'
+
+function logout() {
+  router.post('/logout')
+}
 
 const page = usePage()
-
 const user = computed(() => page.props.auth?.user ?? null)
-const csrf = page.props.csrf_token
 
 const showAuth = ref(false)
 const authMode = ref('login')

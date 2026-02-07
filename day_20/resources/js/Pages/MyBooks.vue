@@ -50,7 +50,7 @@
 
 <script setup>
 import { ref, computed, nextTick, defineOptions } from 'vue'
-import { router } from '@inertiajs/vue3'
+import { router, usePage } from '@inertiajs/vue3'
 
 import AppLayout from './App.vue'
 import BookCard from './BookCard.vue'
@@ -59,23 +59,26 @@ import BookForm from './BookForm.vue'
 
 defineOptions({ layout: AppLayout })
 
+const page = usePage()
+
 const props = defineProps({
   books: { type: Array, default: () => [] },
   title: String,
 })
 
 const emptyForm = () => ({
+  id: null,
   title: '',
   description: '',
   genres: [],
   is_for_adult: false,
-  cover: null,
+  cover: '',
 })
 
 const form = ref(emptyForm())
 const isFormVisible = ref(false)
 const isEditMode = ref(false)
-const currentBookId = ref(null)
+const bookFormRef = ref(null)
 
 const genreOptions = [
   { value: 1, label: 'Повесть' },
@@ -90,12 +93,18 @@ const genreOptions = [
   { value: 10, label: 'Эссе' },
 ]
 
-const totalBooks = computed(() => props.books.length)
+const userId = computed(() => page.props.auth?.user?.id)
+
+const userBooks = computed(() =>
+  props.books.filter(b => b.user_id === userId.value)
+)
+
+const totalBooks = computed(() => userBooks.value.length)
 
 const averageRating = computed(() => {
-  if (!props.books.length) return '0.00'
+  if (!userBooks.value.length) return '0.00'
 
-  const sum = props.books.reduce((acc, b) => {
+  const sum = userBooks.value.reduce((acc, b) => {
     return acc +
       b.rating_1 * 1 +
       b.rating_2 * 2 +
@@ -104,11 +113,11 @@ const averageRating = computed(() => {
       b.rating_5 * 5
   }, 0)
 
-  return (sum / props.books.length).toFixed(2)
+  return (sum / userBooks.value.length).toFixed(2)
 })
 
 const uiBooks = computed(() =>
-  props.books.map(b => ({
+  userBooks.value.map(b => ({
     id: b.id,
     title: b.title,
     description: b.description,
@@ -139,43 +148,32 @@ const dialogTitle = computed(() =>
 
 const showAddForm = async () => {
   isEditMode.value = false
-  currentBookId.value = null
   form.value = emptyForm()
   isFormVisible.value = true
   await nextTick()
+  bookFormRef.value?.focusTitle?.()
 }
 
 const onEditBook = book => {
   isEditMode.value = true
-  currentBookId.value = book.id
 
   form.value = {
+    id: book.id,
     title: book.title,
     description: book.description,
-    genres: Array.isArray(book.genres) ? [...book.genres] : [],
+    genres: [...book.genres],
     is_for_adult: !!book.is_for_adult,
-    cover: null,
+    cover: book.cover,
   }
 
   isFormVisible.value = true
 }
 
-const submitForm = payload => {
+const submitForm = () => {
   if (isEditMode.value) {
-    router.post(
-  `/books/${currentBookId.value}`,
-  payload,
-  {
-    forceFormData: true,
-    preserveScroll: true,
-    headers: {
-      'X-HTTP-Method-Override': 'PUT',
-    },
-    onSuccess: () => closeForm(),
-  }
-)
+    router.put(`/books/${form.value.id}`, form.value)
   } else {
-    router.post('/books', payload)
+    router.post('/books', form.value)
   }
 
   closeForm()
@@ -194,7 +192,6 @@ const onRateBook = ({ bookId, rating }) => {
 const closeForm = () => {
   isFormVisible.value = false
   isEditMode.value = false
-  currentBookId.value = null
   form.value = emptyForm()
 }
 </script>

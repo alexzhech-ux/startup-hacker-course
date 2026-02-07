@@ -3,32 +3,61 @@
     <div class="bookTitleLine">
       <h3 class="bookTitle">{{ book.title }}</h3>
     </div>
+
     <SActionIcon
       class="bookItem_editButton"
       icon="pen-to-square"
       title="Редактировать"
       @click="emitEdit"
     />
-    <SActionIcon class="bookItem_deleteButton" title="Удалить" @click="onDelete" icon="trash" danger
-    confirm="Вы действительно хотите удалить эту книгу?" />
+
+    <SActionIcon
+      class="bookItem_deleteButton"
+      icon="trash"
+      danger
+      title="Удалить"
+      confirm="Вы действительно хотите удалить эту книгу?"
+      @click="emitDelete"
+    />
+
     <div class="bookItemContent">
       <div class="bookCoverBlock">
         <div class="bookCoverBlock_rating">
-          <SImagePreview class="bookCoverBlock_ratingStar" :src="rated ? '/img/icons/ratingStar.png' : '/img/icons/ratingNonStar.png'"/>
+          <SImagePreview
+            class="bookCoverBlock_ratingStar"
+            :src="rated
+              ? '/img/icons/ratingStar.png'
+              : '/img/icons/ratingNonStar.png'"
+          />
           <div class="bookCoverBlock_ratingVolPositioner">
-            <p class="bookCoverBlock_ratingVol">{{ rated ? book.rating : '' }}</p>
+            <p class="bookCoverBlock_ratingVol">
+              {{ rated ? book.rating : '' }}
+            </p>
           </div>
         </div>
-        <SImagePreview class="bookCover" :src="book.cover" :alt="book.coverAlt || book.title"/>
+
+        <SImagePreview
+          class="bookCover"
+          :src="book.cover"
+          :alt="book.coverAlt || book.title"
+        />
       </div>
+
       <div class="bookItemContent_bookData">
         <p class="bookDescription">{{ book.description }}</p>
-        <p class="bookgenre">Жанры:
-          <span v-for="(genre, i) in book.genres" :key="i">
-            {{ genre }}<span v-if="i < book.genres.length - 1">, </span>
+
+        <p class="bookgenre">
+          Жанры:
+          <span v-if="book.genres.length">
+            <span v-for="(genre, i) in book.genreNames" :key="i">
+              {{ genre }}<span v-if="i < book.genreNames.length - 1">, </span>
+            </span>
           </span>
+          <span v-else>—</span>
         </p>
-        <p class="bookRating"> Рейтинг:
+
+        <p class="bookRating">
+          Рейтинг:
           <SActionIcon
             v-for="star in 5"
             :key="star"
@@ -41,33 +70,60 @@
             @click="rate(star)"
           />
         </p>
-        <p class="bookAgeLimit">Возрастное ограничение:{{ book.isForAdult ? '18+' : 'Для всех возрастов' }}</p>
+
+        <p class="bookAgeLimit">
+          Возрастное ограничение:
+          {{ book.isForAdult ? '18+' : 'Для всех возрастов' }}
+        </p>
       </div>
     </div>
   </li>
 </template>
 
 <script setup>
-  import { ref, computed } from 'vue'
-  const props = defineProps({
-    book: { type: Object, required: true },
-    index: { type: Number, required: true }
+import { ref, computed } from 'vue'
+import { SImagePreview, SActionIcon } from 'startup-ui'
+
+const onSubmit = () => {
+  emit('submit', {
+    title: form.value.title,
+    description: form.value.description,
+    genres: form.value.genres,
+    is_for_adult: form.value.is_for_adult,
   })
-  const emit = defineEmits(['edit', 'delete', 'update:rating'])
-  const hoverRating = ref(null)
-  const rated = computed(() => props.book.rating >= 1)
-  const emitEdit = () => {
-    emit('edit', props.index)
-  }
-  const onDelete = () => {
-    emit('delete', props.index)
-  }
-  const rate = (value) => {
-    emit('update:rating', {
-      index: props.index,
-      value
-    })
-  }
+}
+
+const props = defineProps({
+  book: {
+    type: Object,
+    required: true,
+  },
+})
+
+const emit = defineEmits([
+  'edit',
+  'delete',
+  'update:rating',
+])
+
+const hoverRating = ref(null)
+
+const rated = computed(() => Number(props.book.rating) >= 1)
+
+const emitEdit = () => {
+  emit('edit', props.book)
+}
+
+const emitDelete = () => {
+  emit('delete', props.book.id)
+}
+
+const rate = value => {
+  emit('update:rating', {
+    bookId: props.book.id,
+    rating: value,
+  })
+}
 </script>
 
 <style scoped lang="scss">
@@ -75,6 +131,7 @@
   width: 30px;
   height: 26px;
 }
+
 .bookItem {
   position: relative;
   justify-content: center;
@@ -102,11 +159,6 @@
     right: 20px;
     top: 20px;
     background: none;
-
-    &Icon {
-      width: 25px;
-      height: 25px;
-    }
   }
 }
 
@@ -185,11 +237,4 @@
     height: 22px;
   }
 }
-
-.bookRating_star:hover,
-.bookRating_star:hover ~ .bookRating_star {
-  color: gold;
-}
-
 </style>
-

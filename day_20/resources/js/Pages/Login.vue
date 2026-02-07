@@ -1,30 +1,26 @@
-<script setup>
-import { useForm, router } from '@inertiajs/vue3'
+<template>
+  <div class="login-page">
+    <h1>Вход</h1>
 
-const form = useForm({
+    <form @submit.prevent="submit">
+      <input v-model="form.username" placeholder="Username">
+      <input v-model="form.password" type="password" placeholder="Password">
+
+      <button type="submit">Войти</button>
+    </form>
+  </div>
+</template>
+
+<script setup>
+import { reactive } from 'vue'
+import { router } from '@inertiajs/vue3'
+
+const form = reactive({
   username: '',
   password: '',
 })
+
+const submit = () => {
+  router.post('/login', form)
+}
 </script>
-
-<template>
-  <div class="s-login">
-    <SForm @submit.prevent="form.post('/login')">
-      <SFormRow title="Логин">
-        <SInput v-model="form.username" />
-      </SFormRow>
-
-      <SFormRow title="Пароль">
-        <SInput type="password" v-model="form.password" />
-      </SFormRow>
-
-      <SFormRow>
-        <SButton type="submit">Войти</SButton>
-        <SButton type="button" @click="router.visit('/')">Отмена</SButton>
-        <SButton type="button" @click="router.visit('/registration')">
-          Регистрация
-        </SButton>
-      </SFormRow>
-    </SForm>
-  </div>
-</template>

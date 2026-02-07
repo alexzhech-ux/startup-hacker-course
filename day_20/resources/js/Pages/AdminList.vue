@@ -2,6 +2,38 @@
   <div class="app">
     <h1>{{ title }}</h1>
 
+    <div
+      v-if="users.length"
+      class="adminUserSelect"
+    >
+      <select v-model="selectedUserId">
+        <option value="">Выберите пользователя</option>
+        <option
+          v-for="u in users"
+          :key="u.id"
+          :value="u.id"
+        >
+          {{ u.username }}
+        </option>
+      </select>
+
+      <SButton
+        :disabled="!selectedUserId"
+        @click="loadUserBooks"
+      >
+        Показать
+      </SButton>
+    </div>
+
+    <div
+      v-if="selectedUser"
+      class="adminUserInfo"
+    >
+      <h2>Пользователь</h2>
+      <p><strong>ID:</strong> {{ selectedUser.id }}</p>
+      <p><strong>Username:</strong> {{ selectedUser.username }}</p>
+    </div>
+
     <p>Всего книг: {{ totalBooks }}</p>
 
     <p v-if="$page.props.auth?.user">
@@ -23,8 +55,14 @@
       />
     </ul>
 
-    <div class="addBookButtonPosition" v-if="$page.props.auth?.user">
-      <SButton class="addBookButton" @click="showAddForm">
+    <div
+      class="addBookButtonPosition"
+      v-if="$page.props.auth?.user"
+    >
+      <SButton
+        class="addBookButton"
+        @click="showAddForm"
+      >
         Добавить
       </SButton>
     </div>
@@ -51,6 +89,7 @@
 <script setup>
 import { ref, computed, nextTick, defineOptions } from 'vue'
 import { router } from '@inertiajs/vue3'
+import { SButton } from 'startup-ui'
 
 import AppLayout from './App.vue'
 import BookCard from './BookCard.vue'
@@ -60,9 +99,18 @@ import BookForm from './BookForm.vue'
 defineOptions({ layout: AppLayout })
 
 const props = defineProps({
-  books: { type: Array, default: () => [] },
   title: String,
+  books: { type: Array, default: () => [] },
+  users: { type: Array, default: () => [] },
+  selectedUser: { type: Object, default: null }, 
 })
+
+const selectedUserId = ref('')
+
+const loadUserBooks = () => {
+  if (!selectedUserId.value) return
+  router.get(`/admin/books/${selectedUserId.value}`)
+}
 
 const emptyForm = () => ({
   title: '',
@@ -95,14 +143,14 @@ const totalBooks = computed(() => props.books.length)
 const averageRating = computed(() => {
   if (!props.books.length) return '0.00'
 
-  const sum = props.books.reduce((acc, b) => {
-    return acc +
-      b.rating_1 * 1 +
-      b.rating_2 * 2 +
-      b.rating_3 * 3 +
-      b.rating_4 * 4 +
-      b.rating_5 * 5
-  }, 0)
+  const sum = props.books.reduce((acc, b) =>
+    acc +
+    b.rating_1 * 1 +
+    b.rating_2 * 2 +
+    b.rating_3 * 3 +
+    b.rating_4 * 4 +
+    b.rating_5 * 5
+  , 0)
 
   return (sum / props.books.length).toFixed(2)
 })
@@ -152,7 +200,7 @@ const onEditBook = book => {
   form.value = {
     title: book.title,
     description: book.description,
-    genres: Array.isArray(book.genres) ? [...book.genres] : [],
+    genres: [...book.genres],
     is_for_adult: !!book.is_for_adult,
     cover: null,
   }
@@ -162,18 +210,10 @@ const onEditBook = book => {
 
 const submitForm = payload => {
   if (isEditMode.value) {
-    router.post(
-  `/books/${currentBookId.value}`,
-  payload,
-  {
-    forceFormData: true,
-    preserveScroll: true,
-    headers: {
-      'X-HTTP-Method-Override': 'PUT',
-    },
-    onSuccess: () => closeForm(),
-  }
-)
+    router.post(`/books/${currentBookId.value}`, payload, {
+      headers: { 'X-HTTP-Method-Override': 'PUT' },
+      forceFormData: true,
+    })
   } else {
     router.post('/books', payload)
   }
@@ -205,6 +245,12 @@ const closeForm = () => {
   flex-wrap: wrap;
   list-style: none;
   padding: 0;
+}
+
+.adminUserSelect {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 .addBookButtonPosition {
